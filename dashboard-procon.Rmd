@@ -1,0 +1,1197 @@
+---
+title: "dashboard-procon"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    social: [ "twitter", "facebook", "menu"]
+    #source_code: embed
+---
+
+
+
+<style>
+.navbar {
+  background-color:#0d2e08;
+   border-color: #4d9119;
+   font-family: "Times New Roman", "serif","Arial Black";
+}
+
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+    background-color: #09de1b;
+    color: white;
+}
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+  color: white;
+  background-color: #d7de09;
+}
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+  background-color: #ff0015;
+}
+.navbar-inverse .navbar-collapse,
+.navbar-inverse .navbar-form {
+  border-color: #ff0015;
+}
+</style>    
+
+
+
+
+```{css my-header-colors, echo = FALSE}
+
+body {
+  background-color: rgb(125, 161, 43);
+  
+}
+
+badCode {
+background-color: red;
+}
+
+
+
+}
+```
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(highcharter)
+library(ggvis)
+library(readxl)
+library(gt)
+library(tidyverse)
+library(ggspatial)
+library(esquisse)
+
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(gt)
+library(geobr)
+library(sf)
+library(maptools)
+library(leaflet)
+library(plotly)
+library(shiny)
+library(shiny)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(gapminder)
+library(ggplot2)
+library(gganimate)
+
+library(animation)
+
+
+library(geobr)
+
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(ggspatial)
+library(esquisse)
+#rm(list=ls())
+
+
+verme.theme<-theme(plot.background = element_rect(fill = '#e39898'),
+                  
+                  plot.title=element_text(colour='#181819',
+                                          hjust=.5),
+                  plot.subtitle=element_text(colour =  '#e39898',
+                                             hjust=.5),
+                  legend.title = element_text(colour='#181819',
+                                              hjust=.5),
+                  #legend.box.background =  element_rect(fill="lightblue",
+                                                        #size=0.5, linetype="solid")
+                  legend.background = element_blank(),
+                  legend.box.background = element_blank(),
+                  legend.key = element_blank(),
+                  axis.text=element_text(colour = '#181819'),
+                  panel.background =element_rect(fill = '#e39898'),
+                  panel.grid.major.x = element_blank(),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.minor.y = element_blank(),
+                  panel.grid.major.y = element_blank(),
+                  axis.ticks.x.bottom = element_blank(),
+                  axis.ticks.x = element_blank(),
+                  axis.title = element_text(colour ='#181819'))
+
+
+
+
+
+
+
+# que estou usando verme.theme<-theme(plot.background = element_rect(fill = '#e39898'),
+              verme.theme<-  theme(plot.background = element_rect(fill = '#81d674'),
+                  
+                  plot.title=element_text(colour='#181819',
+                                          hjust=.5),
+                  plot.subtitle=element_text(colour =  '#81d674',
+                                             hjust=.5),
+                  legend.title = element_text(colour='#181819',
+                                              hjust=.5),
+                  #legend.box.background =  element_rect(fill="lightblue",
+                                                        #size=0.5, linetype="solid")
+                  legend.background = element_blank(),
+                  legend.box.background = element_blank(),
+                  legend.key = element_blank(),
+                  axis.text=element_text(colour = '#070708'),
+                  panel.background =element_rect(fill = '#81d674'),
+                  panel.grid.major.x = element_blank(),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.minor.y = element_blank(),
+                  panel.grid.major.y = element_blank(),
+                  axis.ticks.x.bottom = element_blank(),
+                  axis.ticks.x = element_blank(),
+                  axis.title = element_text(colour ='#181819'))
+
+
+
+
+
+muni<-read_municipality(
+  code_muni = "PB",
+  year = 2010)
+
+
+
+campinagrande<- filter(muni,muni$name_muni =="Campina Grande")
+
+
+
+```
+
+
+```{r}
+
+
+
+
+
+azul.theme<-theme(plot.background = element_rect(fill = "#144a35"),
+                  
+                  plot.title=element_text(colour='#f2f2f2',
+                                          hjust=.5),
+                  plot.subtitle=element_text(colour =  '#f2f2f2',
+                                             hjust=.5),
+                  
+                  axis.text=element_text(colour = 'gray80'),
+                  panel.background =element_rect(fill = '#144a35'),
+                  panel.grid.major.x = element_blank(),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.minor.y = element_blank(),
+                  panel.grid.major.y = element_blank(),
+                  axis.ticks.x.bottom = element_blank(),
+                  axis.ticks.x = element_blank(),
+                 axis.title = element_text(colour ='gray80')
+)
+
+ comb<-read.csv("C:/Users/josef/Documents/josefersonbarreto/projeto-extensao/combustivel_atualizadoTrat.csv",header = TRUE, stringsAsFactors = FALSE)
+   
+ 
+ 
+ 
+ comb<- comb[-1]
+ 
+
+
+ 
+ comb$G.A[comb$G.A == 4589.000]<-4.589
+
+```
+
+```{r}
+comb<-comb %>% mutate(mes=factor(comb$mes, levels=c("Jan", "Fev", "Mar","Abr","Mai","Jun","Jul","Ago",
+                                              "Set","Out","Nov","Dez"),
+                           labels=c("Jan", "Fev", "Mar","Abr","Mai","Jun","Jul","Ago",
+                                    "set","Out","Nov","Dez")))
+
+media_mes<-aggregate(with(comb, cbind(comb['G.C'],comb['G.A'],comb['E'],comb['D'],comb['S.10'],comb['GNV'])), by = list(mes=comb$mes), mean, na.rm=T)
+
+
+ver<-t(media_mes) 
+
+
+```
+
+
+
+<font color='white' face='Arial Black'  > Vizualização </font>  
+=====================================
+
+
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+
+
+
+### <font color='black' face="Arial Black" > Valores dos Combustíveis Por Semestre de 2021  </font> 
+
+```{r}
+
+
+media_mes$semestre<-c(rep("1 semestre",6),rep("2 semestre",6))
+
+
+semestre<-aggregate(with(media_mes, cbind(media_mes['G.C'],media_mes['G.A'],media_mes['E'],media_mes['D'],media_mes['S.10'],media_mes['GNV'])), by = list(semestre=media_mes$semestre), mean, na.rm=T)
+
+
+
+
+
+media_mes[2:7]<-round(media_mes[2:7],2)
+
+
+
+
+
+
+
+
+
+p <- plot_ly()%>%
+  layout(
+    xaxis = list(title = ""),
+    yaxis = list (title = "preços($)") )%>%
+  layout(xaxis = list(zeroline = F,
+                      showline = T,
+                      showticklabels = T,
+                      showgrid = F),
+         yaxis = list(zeroline = F,
+                      showline = T,
+                      showticklabels=T,
+                      showgrid=T))  %>%
+  layout( paper_bgcolor='rgba(0,0,0,0)',
+          plot_bgcolor='rgba(0,0,0,0)',xaxis = list( 
+            zerolinecolor = '#ffff', 
+            zerolinewidth = 2, 
+            gridcolor = 'ffff'), 
+          yaxis = list( 
+            zerolinecolor = '#ffff', 
+            zerolinewidth = 2, 
+            gridcolor = 'black'),font = list(color = 'black'))## Make sure our list of columns to add doesnt include the Month Considered
+ToAdd <- setdiff(colnames(semestre),"semestre")
+
+## Add the traces one at a time
+for(i in ToAdd){
+  p <- p %>% add_bars(x = semestre[["semestre"]], y = semestre[[i]], name = i,
+                      type = 'scatter',
+                      mode = 'line+markers',
+                      text = round( semestre[[i]],2), textposition = "inside",size = 0.1,
+                      
+                      line = list(color = ' semestre[[i]]', width = 2))
+  
+}
+
+p
+
+
+
+
+```
+
+
+### <font color='black' face="Arial Black"> Melhores preços e Localidade  </font>  
+
+
+
+
+```{r}
+
+library("DT")
+
+
+
+comb$Postos.de.Combustíveis<-str_to_lower(comb$Postos.de.Combustíveis)
+
+
+library(stringr)
+
+melhor_preço<-aggregate(with(comb, cbind(comb['G.C'])),
+                    by = list(posto=comb$Postos.de.Combustíveis,
+                             rua= comb$Bairro,
+                             endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                    min, na.rm=T)
+
+                    
+
+
+
+comb$Postos.de.Combustíveis<-str_to_lower(comb$Postos.de.Combustíveis)
+
+
+
+melhor_preço<-melhor_preço %>% arrange(melhor_preço$G.C)
+
+
+
+
+
+
+
+
+melhor_preço<-melhor_preço %>% arrange(melhor_preço$G.C)
+
+postos<-melhor_preço[1,]
+
+colnames(postos)[5]<-"preços"
+
+
+
+
+
+
+melhor_preço1<-aggregate(with(comb, cbind(comb['G.A'])),
+                        by = list(posto=comb$Postos.de.Combustíveis,
+                                  rua= comb$Bairro,
+                                  endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                        min, na.rm=T)
+
+
+
+melhor_preço1<-melhor_preço1 %>% arrange(melhor_preço1$G.A)
+
+
+
+postos1<-melhor_preço1[1,]
+
+colnames(postos1)[5]<-"preços"
+
+
+
+#preço do etanol deu empate 
+
+
+
+
+melhor_preço2<-aggregate(with(comb, cbind(comb['E'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço2<-melhor_preço2 %>% arrange(melhor_preço2$E)
+
+
+
+postos2<-melhor_preço2[1,]
+
+colnames(postos2)[5]<-"preços"
+
+
+
+#preço do diesel
+melhor_preço3<-aggregate(with(comb, cbind(comb['D'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço3<-melhor_preço3 %>% arrange(melhor_preço3$D)
+
+
+
+postos3<-melhor_preço3[1,]
+
+colnames(postos3)[5]<-"preços"
+
+
+#preço do diesel S-10
+
+
+
+melhor_preço4<-aggregate(with(comb, cbind(comb['S.10'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço4<-melhor_preço4 %>% arrange(melhor_preço4$S.10)
+
+
+
+postos4<-melhor_preço4[1,]
+
+colnames(postos4)[5]<-"preços"
+
+
+
+
+
+
+#preço do gas naturalveicular 
+
+
+
+melhor_preço5<-aggregate(with(comb, cbind(comb['GNV'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço5<-melhor_preço5 %>% arrange(melhor_preço5$GNV)
+
+
+
+postos5<-melhor_preço5[1,]
+
+colnames(postos5)[5]<-"preços"
+
+postos<-melhor_preço[1,]
+
+colnames(postos)[5]<-"preços"
+
+
+postos_b<-rbind(postos,postos1,postos2,postos3,postos4,postos5)
+
+
+
+postos_b$tipo_combustivel<-c("G.C","G.A","E","D","S-10","GNV")
+
+
+library(knitr)
+
+
+     
+
+postos_b %>%  DT::datatable( rownames = FALSE, extensions = 'FixedColumns', escape=TRUE, options= list(bPaginate = FALSE, dom = 't',buttons = c('excel')))%>%formatStyle(1:7,fontSize = '14px')
+
+```
+
+Row{data-width=650}
+------------------------------------
+### <font color='black' face="Arial Black" >Preços dos Combustíveis Por Mês </font> 
+
+```{r}
+
+## Define a blank plot with the desired layout (don't add any traces yet)
+p <- plot_ly()%>%
+  layout(
+         xaxis = list(title = ""),
+         yaxis = list (title = "preços($)") )%>%
+ layout(xaxis = list(zeroline = F,
+                     showline = T,
+                  showticklabels = T,
+                  showgrid = F),
+    yaxis = list(zeroline = F,
+               showline = T,
+              showticklabels=T,
+          showgrid=T))  %>%
+        layout( paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',xaxis = list( 
+           zerolinecolor = '#ffff', 
+          zerolinewidth = 2, 
+           gridcolor = 'ffff'), 
+         yaxis = list( 
+           zerolinecolor = '#ffff', 
+           zerolinewidth = 2, 
+           gridcolor = 'black'),font = list(color = 'black'))
+
+## Make sure our list of columns to add doesnt include the Month Considered
+ToAdd <- setdiff(colnames(media_mes),"mes")
+
+## Add the traces one at a time
+for(i in ToAdd){
+  p <- p %>% add_trace(x = media_mes[["mes"]], y = media_mes[[i]], name = i,
+                       type = 'scatter',
+                       mode = 'line+markers',
+                       
+                       line = list(color = 'media_mes[[i]]', width = 2))
+                       
+}
+
+p
+
+```
+
+
+
+
+### <font color='black' face="Arial Black" >melhores preços de combustiveis por postos </font> 
+
+```{r}
+
+comb$Postos.de.Combustíveis<-str_to_lower(comb$Postos.de.Combustíveis)
+
+
+library(stringr)
+
+melhor_preço<-aggregate(with(comb, cbind(comb['G.C'])),
+                    by = list(posto=comb$Postos.de.Combustíveis,
+                             rua= comb$Bairro,
+                             endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                    min, na.rm=T)
+
+                    
+
+
+
+comb$Postos.de.Combustíveis<-str_to_lower(comb$Postos.de.Combustíveis)
+
+
+
+melhor_preço<-melhor_preço %>% arrange(melhor_preço$G.C)
+
+
+
+
+
+
+
+
+melhor_preço<-melhor_preço %>% arrange(melhor_preço$G.C)
+
+postos<-melhor_preço[1,]
+
+colnames(postos)[5]<-"preços"
+
+
+
+
+
+
+melhor_preço1<-aggregate(with(comb, cbind(comb['G.A'])),
+                        by = list(posto=comb$Postos.de.Combustíveis,
+                                  rua= comb$Bairro,
+                                  endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                        min, na.rm=T)
+
+
+
+melhor_preço1<-melhor_preço1 %>% arrange(melhor_preço1$G.A)
+
+
+
+postos1<-melhor_preço1[1,]
+
+colnames(postos1)[5]<-"preços"
+
+
+
+#preço do etanol deu empate 
+
+
+
+
+melhor_preço2<-aggregate(with(comb, cbind(comb['E'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço2<-melhor_preço2 %>% arrange(melhor_preço2$E)
+
+
+
+postos2<-melhor_preço2[1,]
+
+colnames(postos2)[5]<-"preços"
+
+
+
+#preço do diesel
+melhor_preço3<-aggregate(with(comb, cbind(comb['D'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço3<-melhor_preço3 %>% arrange(melhor_preço3$D)
+
+
+
+postos3<-melhor_preço3[1,]
+
+colnames(postos3)[5]<-"preços"
+
+
+#preço do diesel S-10
+
+
+
+melhor_preço4<-aggregate(with(comb, cbind(comb['S.10'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço4<-melhor_preço4 %>% arrange(melhor_preço4$S.10)
+
+
+
+postos4<-melhor_preço4[1,]
+
+colnames(postos4)[5]<-"preços"
+
+
+
+
+
+
+#preço do gas naturalveicular 
+
+
+
+melhor_preço5<-aggregate(with(comb, cbind(comb['GNV'])),
+                         by = list(posto=comb$Postos.de.Combustíveis,
+                                   rua= comb$Bairro,
+                                   endereço=comb$Endereço,bandeira =comb$Bandeira), 
+                         min, na.rm=T)
+
+
+
+melhor_preço5<-melhor_preço5 %>% arrange(melhor_preço5$GNV)
+
+
+
+postos5<-melhor_preço5[1,]
+
+colnames(postos5)[5]<-"preços"
+
+postos<-melhor_preço[1,]
+
+colnames(postos)[5]<-"preços"
+
+
+postos_b<-rbind(postos,postos1,postos2,postos3,postos4,postos5)
+
+
+
+postos_b$tipo_combustivel<-c("G.C","G.A","E","D","S-10","GNV")
+
+
+
+
+
+
+
+
+
+
+postos_b$tipo_combustivel = factor(postos_b$tipo_combustivel, levels = postos_b$tipo_combustivel)
+p<-ggplot(postos_b, aes(x = tipo_combustivel, y = preços, group_by=posto,
+                     fill =posto))  + geom_bar(stat = "identity")+
+  
+  geom_text(aes(label=round(preços,2)), vjust=1.6,
+            color="black", size=3.5)+labs(x ="combustíveis", y = "preço")+
+  scale_fill_manual(values=c("#a14d03","#032e9c", "#c2d404","#8c0d0d", "#133b19"))+
+  verme.theme
+
+ggplotly(p)
+
+``` 
+
+
+
+<font color='white' face='Arial Black'  > medias de preços /mês </font>  
+=====================================
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+
+### <font color='white' face="Arial Black" > Média do Preço da Gasolina Comum  por Mês   </font> 
+```{r}
+p<-ggplot(media_mes, aes(x=mes, y=G.C,fill=G.C)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(G.C,2)), vjust=1.6,
+            color="white", size=2.8)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+   scale_fill_gradient2(
+  low = "green",
+  #mid = "white",
+  high = "red",
+  midpoint = 0,
+  space = "Lab",
+  #na.value = "grey50",
+  guide = "colourbar"
+)+ guides(fill="none") + azul.theme
+
+
+
+ggplotly(p,tooltip = c("x","y"))
+```
+
+###  <font color='white' face="Arial Black"> Média do Preço da  Gasolina Adtivada por Mês  </font> 
+
+```{r}
+ ## media do preço da  Gasolina Adtivada por mes 
+
+
+gr<-ggplot(media_mes, aes(x=mes, y=G.A,fill=G.A)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(G.A,2)), vjust=1.6,
+            color="white", size=2.8)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+  scale_fill_gradient2(
+    low = "green",
+    #mid = "white",
+    high = "red",
+    midpoint = 0,
+    space = "Lab",
+    #na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill"
+  )+ guides(fill="none") + azul.theme
+
+ggplotly(gr,tooltip = c("x","y"))
+
+```
+
+###  <font color='white' face="Arial Black"> Média do Preço do  Etanol por Mês  </font> 
+
+```{r}
+
+p<-  ggplot(media_mes, aes(x=mes, E,fill=E)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(E,2)), vjust=1.6,
+            color="white", size=2.8)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+  scale_fill_gradient2(
+    low = "green",
+    #mid = "white",
+    high = "red",
+    midpoint = 0,
+    space = "Lab",
+    #na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill"
+  )+ guides(fill="none") + azul.theme
+
+
+ggplotly(p,tooltip = c("x","y"))
+
+
+
+
+```
+
+Row
+------------------------------------
+### <font  color='white' face="Arial Black"> Média do Preço do Diesel por Mês   </font> 
+
+```{r}
+
+
+## media do preço Diesil  por mes 
+
+
+hi<-ggplot(media_mes, aes(x=mes, y=D,fill=D)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(D,2)), vjust=1.6,
+            color="white", size=2.8)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+  scale_fill_gradient2(
+    low = "green",
+    #mid = "white",
+    high = "red",
+    midpoint = 0,
+    space = "Lab",
+    #na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill"
+  )+ guides(fill="none") + azul.theme
+
+ggplotly(hi,tooltip = c("x","y"))
+
+```
+
+
+
+
+### <font  color='white' face="Arial Black"> Média do Preço do Diesel S10 por Mês   </font> 
+
+```{r}
+p<-ggplot(media_mes, aes(x=mes, y=S.10,fill=S.10)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(S.10,2)), vjust=1.6,
+            color="white", size=3.5)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+  scale_fill_gradient2(
+    low = "green",
+    #mid = "white",
+    high = "red",
+    midpoint = 0,
+    space = "Lab",
+    #na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill"
+  )+ guides(fill="none") + azul.theme
+
+
+ggplotly(p,tooltip = c("x","y"))
+
+```
+
+
+
+
+### <font  color='white' face="Arial Black"> Média do Preço do Gás natural veicular por Mês   </font> 
+
+```{r}
+
+kj<-ggplot(media_mes, aes(x=mes, y=GNV,fill=GNV)) + 
+  geom_bar(stat='identity')+ 
+  geom_text(aes(label=round(GNV,2)), vjust=1.6,
+            color="white", size=3.5)+labs(x ="mês", y = "preço")+
+  #scale_fill_gradient(low="#fc6a6a",  mid = "white",high="red")+
+  scale_fill_gradient2(
+    low = "green",
+    #mid = "white",
+    high = "red",
+    midpoint = 0,
+    space = "Lab",
+    #na.value = "grey50",
+    guide = "colourbar",
+    aesthetics = "fill"
+  )+ guides(fill="none") + azul.theme
+
+ggplotly(kj,tooltip = c("x","y"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<font color='white' face='Arial Black' > Região  </font> 
+========================================
+
+
+
+
+
+
+
+
+### <font color='#1a1c1a' face="Arial Black" > Mapa da Paraíba com Destaque  para Campina Grande  </font> 
+
+```{r }
+
+
+
+
+
+
+p<- ggplot(muni)+geom_sf(aes(fill=abbrev_state))+
+  theme(legend.position = "none",
+        legend.key.size = unit(4,"mm"))+
+  geom_sf(data = campinagrande,aes(fill=name_muni))+
+  
+  scale_fill_manual(name="Bar",values = c('green','#aca8b3'#b7ac48','#d5df20','#d8a527','#f4920b','#fa6005'
+  ))+
+  
+  annotation_scale(location= "br", height =  unit(0.2,"cm"))+
+  labs( title = "Campina Grande em destaque ",
+        #subtitle = "Casos \nConfirmados nas últimas 24 hrs",
+        x=NULL,
+        y=NULL) +
+  theme_bw() + 
+  theme(legend.position = "none",
+        legend.key.size = unit(4,"mm"))+azul.theme
+
+ggplotly(p)
+
+```
+
+<font color='white' face='Arial Black' > Dados </font> 
+========================================
+
+```{r}
+comb %>% gt()
+```
+
+
+<font color='white' face='Arial Black' > Resumo  </font> {data-orientation=columns} 
+===========================================
+
+Column 
+-----------------------------------
+
+### <font color='#1a1c1a' face="Arial Black" > Número De Meses Analisados </font> 
+
+```{r}
+
+valueBox(length(media_mes$mes),
+         icon = "fa-calendar" )
+```
+
+
+```{r,echo=FALSE}
+media_mes<-aggregate(with(comb, cbind(comb['G.C'],comb['G.A'],comb['E'],comb['D'],comb['S.10'],comb['GNV'])), by = list(mes=comb$mes), mean, na.rm=T)
+
+
+
+media_var<-aggregate(with(comb, cbind(comb['G.C'],comb['G.A'],comb['E'],comb['D'],comb['S.10'],comb['GNV'])), by = list(variação=comb$variação.mes,mes=comb$mes), mean, na.rm=T)
+
+
+
+
+vari<-media_var %>% filter(mes== "Fev" |mes=="Mai" | mes== "Fev" | mes== "Ago" | mes== "Dez")
+
+
+vari<-data.frame(t(vari))
+
+colnames(vari)<-vari[1,]
+
+vari<-vari[3:8,]
+
+vari$variação<-rownames(vari)
+
+rownames(vari)<-NULL
+#convertendo para numerico
+vari$`FEVEREIRO 1`<-as.numeric(vari$`FEVEREIRO 1`)
+
+vari$`FEVEREIRO 2`<-as.numeric(vari$`FEVEREIRO 2`)
+
+vari$`MAIO 1`<-as.numeric(vari$`MAIO 1`)
+vari$`MAIO 2`<-as.numeric(vari$`MAIO 2`)
+
+
+
+vari$`AGOSTO  1`<-as.numeric(vari$`AGOSTO  1`)
+vari$`AGOSTO 2`<-as.numeric(vari$`AGOSTO 2`)
+
+
+vari$`DEZEMBRO  1`<-as.numeric(vari$`DEZEMBRO  1`)
+
+vari$`DEZEMBRO 2`<-as.numeric(vari$`DEZEMBRO 2`)
+
+
+
+#round((((vari[1:7]*100)/valores[1:11])-100)/100,3)
+
+varf<-vari["FEVEREIRO 2"]-vari["FEVEREIRO 1"]
+#vari[2:8]-vari[1:7]
+
+t<-vari["MAIO 2"]-vari["MAIO 1"]
+
+```
+
+### <font color='#1a1c1a' face="Arial Black" > Diesel teve maior variação de todos os preços de combustível em um único mês no mês de fevereiro  </font>  
+
+```{r}
+
+valueBox(paste(round(varf[5,],2),"$"),
+         icon = "fa-gas-pump" )
+
+```
+
+Column
+---------------------------
+
+<font color='white' face="Arial Black" > Relatório  </font>
+
+* <font color='white' face="Arial Black" > Este é um relatório sobre  os preços de combustíveis em Campina Grande-PB .  </font> 
+
+* <font color='white' face="Arial Black" > Foram analisadas `r length(row.names(comb))` observações.  </font> 
+
+
+* <font color='white' face="Arial Black" > Média do preço da gasolina comum em  2021/litro :  `r round(mean(media_mes$G.C),2)` $  .  </font> 
+
+* <font color='white' face="Arial Black" > Preço médio da gasolina  aditivada em  2021/litro :  `r round(mean(media_mes$G.A),2)` $  .  </font> 
+
+
+* <font color='white' face="Arial Black" > Preço médio do etanol em  2021/litro :  `r round(mean(media_mes$E),2)` $  .  </font> 
+
+
+* <font color='white' face="Arial Black" > Preço médio do diesel em  2021/litro :  `r round(mean(media_mes$D),2)` $  .  </font> 
+
+
+* <font color='white' face="Arial Black" > Preço médio do diesel-S10 em  2021/litro :  `r round(mean(media_mes$S.10),3)` $  .  </font> 
+
+* <font color='white' face="Arial Black" > Preço médio do gás natarual veícular em  2021/litro :  `r round(mean(media_mes$GNV),2)` $  .  </font> 
+
+
+
+
+<font color='white'>Este relatório foi gerado em `r format(Sys.Date(), format = "%B %d, %Y")` </font> 
+
+<font color='white' face='Arial Black' > Sobre o Relatório </font>
+========================================
+
+criado por: Joseferson da Silva  Barreto
+
+Atenção!: para uma melhor visualização do dashboard em seu navegador execute o seu  
+navegador em modo tela cheia ou clique em F11 no seu teclado!
+
+
+
+<style>
+
+#média-do-preço-da-gasolina-adtivada-por-mês {
+color: white;
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+
+}
+
+
+#diesel-teve-maior-variação-de-todos-os-preços-de-combustível-em-um-único-mês-no-mês-de-fevereiro{
+color: #323b1d;
+background-color: rgb(129, 214, 116);
+
+
+} 
+
+#porcentagem-de-aumento-nos-preços-dos-combustíveis-a-cada-mês{
+color: white;
+background-color: rgb(129, 214, 116);
+border:4px solid #7c8a15;
+border-radius: 12px;
+width: 400px;
+
+}
+
+
+
+
+
+#média-do-preço-do-diesel-por-mês {
+color: white;
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+
+}
+
+#média-do-preço-do-diesel-s10-por-mês {
+color: white;
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+
+}
+
+
+
+#média-do-preço-do-gás-natural-veicular-por-mês {
+color: white;
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+
+}
+
+#média-do-preço-do-etanol-por-mês {
+color: white;
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+
+}
+
+
+
+
+#número-de-meses-analisados {
+color: #323b1d;
+background-color: rgb(129, 214, 116);
+}
+
+#valores-dos-combustíveis-por-semestre-de-2021 {
+color: white;
+background-color: rgb(129, 214, 116);
+border:4px solid #7c8a15;
+border-radius: 12px;
+}
+
+#dashboard {
+background-color: rgb(227, 152, 152)
+}
+
+
+
+
+
+  
+
+#preços-dos-combustíveis-por-mês {
+text-align: center;
+color: red;
+background-color: rgb(129, 214, 116);
+border:4px solid  #7c8a15;
+border-radius: 12px;
+}
+
+#mapa-da-paraíba-com-destaque-para-campina-grande  {
+text-align: center;
+color: red;
+background-color: rgb(208, 255, 0);
+border:4px solid  #7c8a15;
+border-radius: 12px;
+}
+
+
+
+
+#média-do-preço-da-gasolina-comum-por-mês {
+color: rgb(145, 49, 25);
+background-color: rgb(20, 74, 53);
+border:4px solid #7c8a15;
+border-radius: 12px;
+}
+
+
+
+.dataTables_scrollBody {
+    max-height: 100% !important
+    ;
+}
+
+
+#dataTables_scrollBody {
+    max-height: 100% !important;
+    background-color: rgb(129, 214, 116);
+}
+
+
+# melhores-preços-e-Localidade {
+background-color: rgb(129, 214, 116);
+
+}
+</style>  
